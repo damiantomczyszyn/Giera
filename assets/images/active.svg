@@ -1,0 +1,44 @@
+<svg width="63.765mm" height="47.89mm" version="1.1" viewBox="0 0 63.765 47.89" xmlns="http://www.w3.org/2000/svg">
+ <g fill="#8ae234" stroke="#000" stroke-linecap="square" stroke-width=".26458">
+  <rect x="26.591" y="42.466" width="5.2917" height="5.2916"/>
+  <rect x="42.466" y="42.466" width="5.2917" height="5.2916"/>
+  <rect x="37.174" y="42.466" width="5.2917" height="5.2916"/>
+  <g id="StandingTorso" transform="translate(10.451 -.13227)">
+   <rect x="5.4239" y="21.299" width="5.2917" height="5.2916"/>
+   <rect x="10.716" y="26.591" width="5.2917" height="5.2916"/>
+   <rect x="10.716" y="21.299" width="5.2917" height="5.2916"/>
+   <rect x="5.4239" y="10.716" width="5.2917" height="5.2916"/>
+   <rect x=".13229" y="16.007" width="5.2917" height="5.2916"/>
+   <rect x="5.424" y=".13229" width="5.2917" height="5.2916"/>
+   <rect x="10.716" y="5.424" width="5.2917" height="5.2916"/>
+   <rect x=".13229" y="5.424" width="5.2917" height="5.2916"/>
+   <rect x="5.4239" y="16.007" width="5.2917" height="5.2916"/>
+   <rect x="16.007" y="16.007" width="5.2917" height="5.2916"/>
+   <rect x="10.716" y="16.007" width="5.2917" height="5.2916"/>
+   <rect x=".13229" y="21.299" width="5.2917" height="5.2916"/>
+   <rect x="5.424" y="26.591" width="5.2917" height="5.2916"/>
+   <rect x=".13229" y="26.591" width="5.2917" height="5.2916"/>
+  </g>
+  <rect x="21.299" y="42.466" width="5.2917" height="5.2916"/>
+  <rect x="10.716" y="42.466" width="5.2917" height="5.2916"/>
+  <rect id="StandingHeel" transform="rotate(11.016)" x="13.342" y="39.636" width="5.2917" height="5.2916"/>
+  <g id="StandingLeg" transform="rotate(19.556 10.715 42.467)">
+   <rect x="5.4239" y="31.882" width="5.2917" height="5.2916"/>
+   <rect x="5.424" y="37.174" width="5.2917" height="5.2916"/>
+  </g>
+  <g id="LayingTorso" transform="rotate(2.6013 37.165 42.466)">
+   <rect x="37.174" y="26.591" width="5.2917" height="5.2916"/>
+   <rect x="31.882" y="26.591" width="5.2917" height="5.2916"/>
+   <rect x="26.591" y="31.882" width="5.2917" height="5.2916"/>
+   <rect x="26.591" y="37.174" width="5.2917" height="5.2916"/>
+   <rect x="31.882" y="31.882" width="5.2917" height="5.2916"/>
+   <rect x="37.174" y="31.882" width="5.2917" height="5.2916"/>
+   <rect x="42.466" y="26.591" width="5.2917" height="5.2916"/>
+   <rect x="47.757" y="31.882" width="5.2917" height="5.2916"/>
+   <rect x="53.049" y="26.591" width="5.2917" height="5.2916"/>
+   <rect x="47.757" y="21.299" width="5.2917" height="5.2916"/>
+   <rect x="26.591" y="26.591" width="5.2917" height="5.2916"/>
+   <rect x="37.174" y="37.174" width="5.2917" height="5.2916"/>
+  </g>
+ </g>
+</svg>

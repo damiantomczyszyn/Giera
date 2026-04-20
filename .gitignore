@@ -1,0 +1,13 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+build/
+scores.json
+
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.claude/
