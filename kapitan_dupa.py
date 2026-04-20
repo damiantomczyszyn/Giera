@@ -1,15 +1,12 @@
 import asyncio
-import io
 import json
 import random
 import re
 import sys
+import tempfile
 from pathlib import Path
 
 import pygame
-
-pygame.mixer.pre_init(44100, -16, 2, 1024)
-pygame.init()
 
 BASE = Path(__file__).resolve().parent
 IMG_DIR = BASE / "assets" / "images"
@@ -26,20 +23,45 @@ CLICK_SCORE = 10
 HIT_STEP = 100
 FPS = 60
 
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Kapitan Dupa")
-icon = pygame.image.load(str(IMG_DIR / "active.svg"))
-pygame.display.set_icon(icon)
-clock = pygame.time.Clock()
+ST_START = "start"
+ST_INTRO = "intro"
+ST_PLAY = "play"
+ST_OVER = "over"
+ST_LOW_MIERNY = "low_mierny"
+ST_LOW_KAPITAN = "low_kapitan"
+ST_LOW_SPROBUJ = "low_sprobuj"
+ST_HIGH_SHOW = "high_show"
+ST_HIGH_LOGIN = "high_login"
+ST_BOARD_KAP = "board_kap"
+ST_BOARD_SPROBUJ = "board_sprobuj"
 
-font_box_label = pygame.font.SysFont("arial", 20, bold=True)
-font_box_value = pygame.font.SysFont("arial", 28, bold=True)
-font_label = pygame.font.SysFont("arial", 42, bold=True)
-font_value = pygame.font.SysFont("arial", 60, bold=True)
-font_exclaim = pygame.font.SysFont("arial", 160, bold=True)
-font_input = pygame.font.SysFont("consolas", 70, bold=True)
-font_board_title = pygame.font.SysFont("arial", 34, bold=True)
-font_board_row = pygame.font.SysFont("consolas", 26, bold=True)
+SOUND_NAMES = [
+    "truTuTu", "jakBabe", "noCoJest", "dlaczego", "gameOver",
+    "zCalychSil", "wpiszLogin", "nicNieCzuje", "kapitanDupa",
+    "miernyWynik", "sprobujJeszczeRaz", "rundaPierwsza", "najwyzszyWynik",
+]
+
+screen = None
+clock = None
+font_box_label = None
+font_box_value = None
+font_label = None
+font_value = None
+font_exclaim = None
+font_input = None
+font_board_title = None
+font_board_row = None
+img_start = None
+img_restart = None
+img_active = None
+img_deactive = None
+img_gameover = None
+hit_bars = []
+S = {}
+CH_UI = None
+CH_LOOP = None
+EVENT_UI_END = 0
+EVENT_LOOP_END = 0
 
 
 def load_img(name, scale=1.0):
@@ -49,13 +71,6 @@ def load_img(name, scale=1.0):
         h = int(img.get_height() * scale)
         img = pygame.transform.smoothscale(img, (w, h))
     return img
-
-
-img_start = load_img("start.svg")
-img_restart = load_img("restart.svg")
-img_active = load_img("active.svg", 2.2)
-img_deactive = load_img("deactive.svg", 2.2)
-img_gameover = load_img("gameover.svg", 1.3)
 
 
 def render_hit_bar(red_count):
@@ -68,31 +83,18 @@ def render_hit_bar(red_count):
                 raw,
                 count=1,
             )
-    data = raw.encode("utf-8")
-    surf = pygame.image.load(io.BytesIO(data), "hit.svg").convert_alpha()
+    tmp_path = Path(tempfile.gettempdir()) / f"hit_cache_{red_count}.svg"
+    tmp_path.write_text(raw, encoding="utf-8")
+    surf = pygame.image.load(str(tmp_path)).convert_alpha()
+    try:
+        tmp_path.unlink()
+    except Exception:
+        pass
     return pygame.transform.smoothscale(surf, (280, 35))
-
-
-hit_bars = [render_hit_bar(i) for i in range(10)]
 
 
 def load_sound(name):
     return pygame.mixer.Sound(str(SND_DIR / f"{name}.ogg"))
-
-
-SOUND_NAMES = [
-    "truTuTu", "jakBabe", "noCoJest", "dlaczego", "gameOver",
-    "zCalychSil", "wpiszLogin", "nicNieCzuje", "kapitanDupa",
-    "miernyWynik", "sprobujJeszczeRaz", "rundaPierwsza", "najwyzszyWynik",
-]
-S = {name: load_sound(name) for name in SOUND_NAMES}
-
-CH_UI = pygame.mixer.Channel(0)
-CH_LOOP = pygame.mixer.Channel(1)
-EVENT_UI_END = pygame.USEREVENT + 1
-EVENT_LOOP_END = pygame.USEREVENT + 2
-CH_UI.set_endevent(EVENT_UI_END)
-CH_LOOP.set_endevent(EVENT_LOOP_END)
 
 
 def load_scores():
@@ -105,7 +107,10 @@ def load_scores():
 
 
 def save_scores(scores):
-    SCORES_FILE.write_text(json.dumps(scores, ensure_ascii=False), encoding="utf-8")
+    try:
+        SCORES_FILE.write_text(json.dumps(scores, ensure_ascii=False), encoding="utf-8")
+    except Exception:
+        pass
 
 
 def top_score():
@@ -113,17 +118,45 @@ def top_score():
     return max((x["value"] for x in s), default=0)
 
 
-ST_START = "start"
-ST_INTRO = "intro"
-ST_PLAY = "play"
-ST_OVER = "over"
-ST_LOW_MIERNY = "low_mierny"
-ST_LOW_KAPITAN = "low_kapitan"
-ST_LOW_SPROBUJ = "low_sprobuj"
-ST_HIGH_SHOW = "high_show"
-ST_HIGH_LOGIN = "high_login"
-ST_BOARD_KAP = "board_kap"
-ST_BOARD_SPROBUJ = "board_sprobuj"
+def init_pygame():
+    global screen, clock
+    global font_box_label, font_box_value, font_label, font_value
+    global font_exclaim, font_input, font_board_title, font_board_row
+    global img_start, img_restart, img_active, img_deactive, img_gameover
+    global hit_bars, S, CH_UI, CH_LOOP, EVENT_UI_END, EVENT_LOOP_END
+
+    pygame.init()
+    pygame.mixer.init()
+
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("Kapitan Dupa")
+    clock = pygame.time.Clock()
+
+    font_box_label = pygame.font.SysFont("arial", 20, bold=True)
+    font_box_value = pygame.font.SysFont("arial", 28, bold=True)
+    font_label = pygame.font.SysFont("arial", 42, bold=True)
+    font_value = pygame.font.SysFont("arial", 60, bold=True)
+    font_exclaim = pygame.font.SysFont("arial", 160, bold=True)
+    font_input = pygame.font.SysFont("consolas", 70, bold=True)
+    font_board_title = pygame.font.SysFont("arial", 34, bold=True)
+    font_board_row = pygame.font.SysFont("consolas", 26, bold=True)
+
+    img_start = load_img("start.svg")
+    img_restart = load_img("restart.svg")
+    img_active = load_img("active.svg", 2.2)
+    img_deactive = load_img("deactive.svg", 2.2)
+    img_gameover = load_img("gameover.svg", 1.3)
+
+    hit_bars = [render_hit_bar(i) for i in range(10)]
+
+    S = {name: load_sound(name) for name in SOUND_NAMES}
+
+    CH_UI = pygame.mixer.Channel(0)
+    CH_LOOP = pygame.mixer.Channel(1)
+    EVENT_UI_END = pygame.USEREVENT + 1
+    EVENT_LOOP_END = pygame.USEREVENT + 2
+    CH_UI.set_endevent(EVENT_UI_END)
+    CH_LOOP.set_endevent(EVENT_LOOP_END)
 
 
 class Blink:
@@ -406,6 +439,7 @@ def handle_event(event, game):
 
 
 async def main():
+    init_pygame()
     game = Game()
     running = True
     while running:
