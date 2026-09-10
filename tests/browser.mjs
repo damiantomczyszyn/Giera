@@ -46,7 +46,11 @@ try {
   await page.mouse.click(620,420);
   assert.match(await page.locator('#score').textContent(),/^110/);
   await page.screenshot({path:'test-results/playing.png'});
+  // Holding the action button across the deadline must not award a late hit
+  // or let the ensuing native click start an unintended new round.
+  await page.locator('#start').hover(); await page.mouse.down();
   await phase(page,'results');
+  await page.mouse.up(); await phase(page,'results');
   assert.equal(await page.locator('#result-score').textContent(),'110');
   assert.equal(await page.locator('#timer').textContent(),'0.00');
   await page.locator('#name').fill('TEST'); await page.locator('#score-form button').click();

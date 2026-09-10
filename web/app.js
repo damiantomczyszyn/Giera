@@ -139,9 +139,9 @@ function release(source) {
 }
 for (const target of [$('arena'), $('start')]) {
   target.addEventListener('pointerdown', e => {
+    if (target === $('start')) playButtonClick = phase === 'playing';
     if (phase !== 'playing' || e.button !== 0) return;
     e.preventDefault(); target.setPointerCapture(e.pointerId);
-    if (target === $('start')) playButtonClick = true;
     press(`pointer:${e.pointerId}`);
   });
   target.addEventListener('pointerup', e => {
@@ -157,8 +157,9 @@ for (const target of [$('arena'), $('start')]) {
   });
   target.addEventListener('contextmenu', e => { if (phase === 'playing') e.preventDefault(); });
 }
-$('start').addEventListener('click', () => {
-  if (playButtonClick) { playButtonClick = false; return; }
+$('start').addEventListener('click', e => {
+  if (playButtonClick && e.detail > 0) { playButtonClick = false; return; }
+  playButtonClick = false;
   if (['idle','results','aborted'].includes(phase)) startRound();
 });
 $('skip-intro').addEventListener('click', () => {
