@@ -1,17 +1,18 @@
-name: Deploy to GitHub Pages
+name: Test and deploy game
 
 on:
   push:
     branches: [main]
+    paths-ignore: ['**.md']
+  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
+  pages: read
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -20,27 +21,49 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install pygbag
-        run: pip install pygbag==0.9.3
+      - name: Test round rules
+        run: npm test
 
-      - name: Build WASM bundle
-        run: python -m pygbag --build --ume_block 0 --title "Kapitan Dupa" --app_name "KapitanDupa" main.py
+      - name: Check Python
+        run: python -m py_compile kapitan_dupa.py main.py scripts/build_web.py
+
+      - name: Build static game
+        run: python scripts/build_web.py
+
+      - name: Install browser test tools
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Test browser gameplay
+        run: node tests/browser.mjs
 
       - name: Setup Pages
+        if: github.event_name != 'pull_request'
         uses: actions/configure-pages@v5
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
         with:
-          path: build/web
+          path: build/site
 
   deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

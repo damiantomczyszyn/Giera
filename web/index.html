@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#131e18">
+  <meta name="description" content="Kapitan Dupa — 9 sekund, oryginalne animacje i kultowe teksty. Zagraj za darmo na telefonie lub komputerze i pobij swój rekord.">
+  <meta property="og:title" content="Kapitan Dupa · Galaktyka czeka">
+  <meta property="og:description" content="9 sekund. Cała siła. Jeden kapitan. Dasz radę pobić swój rekord?">
+  <title>Kapitan Dupa — Galaktyka czeka</title>
+  <link rel="icon" href="assets/images/active.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preload" href="assets/images/active.svg" as="image">
+  <link rel="preload" href="assets/images/deactive.svg" as="image">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#arena">Przejdź do gry</a>
+  <header class="site-header wrap">
+    <a class="brand" href="./" aria-label="Kapitan Dupa, strona główna"><span class="brand-mark">KD<span>✳</span></span><span>KURVIX<br><b>ARCADE CLUB</b></span></a>
+    <nav aria-label="Nawigacja"><a href="#how">Jak grać <span>↗</span></a><a href="#ranking">Ranking <span>↗</span></a></nav>
+    <span class="edition"><i></i> EDYCJA 02 / KLASYK WRACA</span>
+  </header>
+  <main class="wrap">
+    <section class="intro-header" aria-labelledby="title">
+      <div><p class="eyebrow"><span>01 — GALAKTYKA KURVIX</span><span class="pill">9 SEKUND CHWAŁY</span></p>
+      <h1 id="title">KAPITAN <em>DUPA<span class="title-star">✳</span></em></h1></div>
+      <div class="hero-note"><span class="note-cross">+</span><p>Cała galaktyka.<br>Cała twoja siła.<br><strong>Jeden bardzo krótki plan.</strong></p></div>
+    </section>
+    <div class="game-layout">
+      <section class="game-panel" aria-label="Gra Kapitan Dupa">
+        <div class="panel-toolbar"><span><i class="status-dot"></i> <span id="status-label">GOTOWY DO AKCJI</span></span><div class="tools"><button id="mute" class="icon-button" aria-label="Wycisz dźwięk" aria-pressed="false" title="Dźwięk (M)">DŹWIĘK <span id="sound-icon">◖))</span></button><button id="fullscreen" class="icon-button" aria-label="Pełny ekran" title="Pełny ekran">⛶</button></div></div>
+        <div id="arena" class="arena" tabindex="0" role="group" aria-label="Pole gry. Naciśnij i puść spację lub dotknij postaci.">
+          <div class="arena-grid" aria-hidden="true"></div><span class="coord coord-tl" aria-hidden="true">SEKTOR 69 / KURVIX</span><span class="coord coord-tr" aria-hidden="true">[ KD—01 ]</span>
+          <div class="orbit orbit-one" aria-hidden="true"></div><div class="orbit orbit-two" aria-hidden="true"></div>
+          <div class="character-wrap" id="character-wrap"><span class="character-label" aria-hidden="true">OBIEKT: KAPITAN</span><img id="character" class="character" src="assets/images/deactive.svg" alt="Oryginalna postać Kapitana Dupy" draggable="false"><div class="character-shadow"></div></div>
+          <div class="stage-copy" id="ready-copy"><span class="tiny-tag">MISJA JEST PROSTA</span><h2>NIE MYŚL. KLIKAJ.</h2><p>Masz 9 sekund. Pokaż, na co cię stać.</p></div>
+          <div id="countdown" class="countdown" hidden><span id="countdown-label">KAPITAN MELDUJE SIĘ</span><strong id="countdown-value">3</strong><button id="skip-intro" class="text-button">Pomiń intro →</button></div>
+          <div id="play-callout" class="play-callout" hidden><span>DAWAJ Z CAŁYCH SIŁ!</span><b id="floating-score" aria-hidden="true">+10</b></div>
+          <div id="result" class="result" hidden>
+            <span id="result-kicker" class="tiny-tag">MISJA ZAKOŃCZONA</span><h2 id="result-title">KAPITAN!</h2><div class="result-score"><strong id="result-score">0</strong><span>PUNKTÓW</span></div><p id="result-message"></p>
+            <div class="result-stats"><span><b id="result-hits">0</b> trafień</span><span><b id="result-cps">0</b> kliknięć / s</span><span><b id="result-best">0</b> najlepsza sekunda</span></div>
+            <form id="score-form"><label for="name">Podpisz swój wynik <span>maks. 5 znaków</span></label><div><input id="name" name="name" maxlength="5" placeholder="LOGIN" autocomplete="nickname" aria-label="Login, maksymalnie 5 znaków" required><button class="small-button" type="submit">ZAPISZ ↗</button></div></form>
+            <p id="save-status" class="save-status" role="status"></p>
+          </div>
+          <div id="interrupted" class="interrupted" hidden><span class="tiny-tag">PRZERWANO SYGNAŁ</span><h2>KAPITAN<br>POCZEKA.</h2><p>Opuszczenie karty przerywa rundę.<br>Zacznij od nowa, gdy będziesz gotowy.</p></div>
+          <span class="coord coord-bl" aria-hidden="true">NACIŚNIJ / PUŚĆ / POWTÓRZ</span><span class="coord coord-br" aria-hidden="true">+10 PKT / HIT</span>
+        </div>
+        <div class="hud"><div class="hud-score"><span>TWÓJ WYNIK</span><strong id="score">000<span>PKT</span></strong></div><div class="hud-hits"><div><span>MOC KAPITANA</span><span id="power-value">0 / 9</span></div><div id="hit-bar" class="hit-bar" aria-label="Moc: 0 z 9"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div><div class="hud-time"><span>POZOSTAŁO</span><strong><span id="timer">9.00</span><small>S</small></strong></div></div>
+        <div class="time-track" aria-hidden="true"><div id="time-fill"></div></div>
+        <div class="action-row"><button id="start" class="primary-button"><span id="start-label">NAPRZÓD, ŻOŁNIERZU!</span><span>↗</span></button><span class="control-hint"><kbd>SPACJA</kbd><span>lub klik / dotyk</span></span></div>
+        <p id="notice" class="notice" role="status" hidden></p>
+      </section>
+      <aside class="sidebar">
+        <section class="record-card"><span class="eyebrow">TWÓJ REKORD <span>↗</span></span><div><strong id="personal-best">000</strong><span>PKT</span></div><p id="record-caption">Pierwsza misja? Zapisz się w historii.</p><div class="record-bottom"><span class="mini-star">✳</span><span>MAŁO CZASU.<br>DUŻO DO UDOWODNIENIA.</span></div></section>
+        <section class="ranking-card" id="ranking"><div class="section-label"><h2>TABLICA CHWAŁY</h2><span>TOP 10</span></div><p class="local-note">Wyniki na tym urządzeniu</p><ol id="leaderboard"></ol><div class="empty-ranking" id="empty-ranking"><span>—</span><p>Tu może być twój login.<br><strong>Zrób pierwszy ruch.</strong></p></div><div class="ranking-foot"><i></i> Każda legenda od czegoś zaczyna.</div></section>
+        <details class="settings"><summary>USTAWIENIA MISJI <span>+</span></summary><div><label for="volume">Głośność <output id="volume-value">70%</output></label><input id="volume" type="range" min="0" max="100" value="70"><label class="check"><input type="checkbox" id="quick"> Szybki start (odliczanie 3 s)</label><label class="check"><input type="checkbox" id="motion"> Ogranicz animacje</label></div></details>
+      </aside>
+    </div>
+    <section id="how" class="how"><div class="how-heading"><p class="eyebrow">02 — INSTRUKCJA OBSŁUGI KAPITANA</p><h2>PROSTE JAK<br><em>TRZY RUCHY.</em></h2></div><article><span>01 /</span><h3>WEJDŹ DO AKCJI</h3><p>Odpal rundę i poczekaj na sygnał. Oryginalne teksty wprowadzą cię w klimat.</p></article><article><span>02 /</span><h3>NACIŚNIJ. PUŚĆ.</h3><p>Spacja, mysz lub dotyk. Pełne kliknięcie daje 10 punktów. Trzymanie nie wystarczy.</p></article><article><span>03 /</span><h3>POBIJ SWÓJ REKORD</h3><p>9 sekund, zero wymówek. Co 100 punktów rośnie moc. Zapisz wynik i spróbuj jeszcze raz.</p></article></section>
+    <section class="session-strip"><span class="tiny-tag">DZIENNIK MISJI</span><span>Rozegrane rundy <b id="rounds">0</b></span><span>Łącznie trafień <b id="total-hits">0</b></span><span>Ostatnia runda <b id="last-score">—</b></span></section>
+  </main>
+  <footer class="wrap"><span>KD ✳ <b>KU CHWALE GALAKTYKI.</b></span><p>Oryginał: <a href="https://github.com/Megaemce/KapitanDupa" target="_blank" rel="noopener noreferrer">Megaemce ↗</a><span> / </span><a href="https://github.com/damiantomczyszyn/Giera" target="_blank" rel="noopener noreferrer">Kod gry ↗</a><span> / </span><a href="LICENSE">GPL-3.0</a></p></footer>
+  <div id="announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+  <noscript><p class="noscript">Włącz JavaScript w przeglądarce, aby uruchomić grę.</p></noscript>
+</body>
+</html>

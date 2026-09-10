@@ -11,3 +11,6 @@ Thumbs.db
 .vscode/
 .idea/
 .claude/
+node_modules/
+.gemini-judge/
+test-results/

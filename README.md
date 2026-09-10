@@ -1,8 +1,28 @@
 # Giera — Kapitan Dupa
 
-Port gry **Kapitan Dupa** na Pythona + pygame, z wersją przeglądarkową (WebAssembly via `pygbag`) wdrażaną na GitHub Pages.
+**[Zagraj w przeglądarce →](https://damiantomczyszyn.github.io/Giera/)**
 
-Oparte o [Megaemce/KapitanDupa](https://github.com/Megaemce/KapitanDupa) (GPL-3.0). Oryginalne grafiki (`assets/images/`) i dźwięki (`assets/sounds/`, przekonwertowane z MP3 na OGG dla kompatybilności z WASM) pochodzą stamtąd.
+Edycja 02: responsywna gra arcade na komputer i telefon, z oryginalną postacią,
+animacją oraz 13 nagraniami. Osobny port Python + pygame pozostaje dostępny lokalnie.
+Wersja web działa bez pobierania interpretera Python i bez zewnętrznego CDN.
+
+Oparte o [Megaemce/KapitanDupa](https://github.com/Megaemce/KapitanDupa) (GPL-3.0).
+Oryginalne SVG i MP3 oraz konwersje OGG znajdują się w `assets/`.
+Pochodzenie materiałów: [THIRD_PARTY.md](THIRD_PARTY.md).
+
+## Co nowego w wersji web
+
+- Oprawa arcade, interfejs PL i obsługa spacji, myszy oraz dotyku.
+- Dokładne 9 sekund; +10 tylko za pełne naciśnięcie i puszczenie. Powtarzanie
+  klawisza i jednoczesne źródła wejścia nie dublują trafień.
+- Statystyki rundy: trafienia, kliknięcia/s, najlepsza sekunda i stopień Kapitana.
+- Top 10, rekord i statystyki zapisane na danym urządzeniu. Bez kont
+  i rankingu globalnego; wersja desktop ma własny `scores.json`.
+- Oryginalne intro i głosy, głośność, wyciszenie (`M`), szybki start (3 s),
+  pełny ekran tam, gdzie wspiera go przeglądarka, ograniczenie animacji.
+- Awaria audio lub blokada localStorage nie blokuje gry. Ukrycie karty przerywa
+  rundę; niepełny wynik nie jest zapisywany.
+- Testy zasad oraz prawdziwej przeglądarki przed wdrożeniem.
 
 ## Uruchomienie lokalne
 
@@ -19,24 +39,56 @@ python kapitan_dupa.py
 - Ekran startowy — klik / `Spacja` aby rozpocząć
 - Masz **9 sekund**: naciskaj i puszczaj `Spację` lub LPM jak najszybciej
 - Każde puszczenie = **+10 punktów**; co 100 punktów zapala się jedna z 9 kropek `HIT`
-- Po czasie: jeśli to nowy rekord — wpisujesz login (max 5 znaków) i zapisujesz wynik do scoreboardu (`scores.json`)
+- Web: po rundzie wpisz login (max 5 znaków) i zapisz wynik lokalnie lub od razu
+  zagraj ponownie. Desktop zachowuje oryginalną sekwencję rekordu i loginu.
 
 ## Wersja przeglądarkowa (GitHub Pages)
 
 Lokalna budowa i podgląd w przeglądarce:
 
-```bash
-python -m pygbag main.py     # dev server na http://localhost:8000
-python -m pygbag --build main.py    # tylko budowa do build/web/
+```powershell
+python scripts/build_web.py
+python -m http.server 8000 --bind 127.0.0.1 --directory build/site
 ```
 
-Deploy na GitHub Pages odbywa się automatycznie przez workflow w [.github/workflows/deploy.yml](.github/workflows/deploy.yml) przy każdym pushu na `main`.
+Otwórz `http://localhost:8000`. Nie otwieraj index.html jako file:// — moduły JS
+i audio wymagają serwera HTTP. Build kopiuje wyłącznie publiczne pliki gry.
 
-**Aby włączyć GitHub Pages w tym repo:**
+Deploy przez [.github/workflows/deploy.yml](.github/workflows/deploy.yml): push na
+`main` → testy → `build/site` → GitHub Pages. PR wykonuje testy bez publikacji.
+Source w Settings → Pages: **GitHub Actions**.
 
-1. Settings → Pages
-2. Source: **GitHub Actions**
-3. Po pierwszym udanym przebiegu workflow gra będzie dostępna pod `https://<user>.github.io/Giera/`
+## Testy
+
+Node 22+ i Python 3.12+:
+
+```powershell
+npm ci
+npm test
+python scripts/build_web.py
+npx playwright install chromium
+npm run test:browser
+```
+
+Windows z zainstalowanym Edge może zamiast pobierania Chromium użyć:
+
+```powershell
+$env:BROWSER_CHANNEL='msedge'
+npm run test:browser
+```
+
+Testy startują własny serwer na wolnym porcie, grają pełną rundę, weryfikują
+animację, dźwięki, zapis po odświeżeniu, dotyk i działanie bez audio/storage.
+Zrzuty trafiają do ignorowanego `test-results/`.
+Zmiennej `GAME_URL` można użyć do sprawdzenia wdrożonej strony tym samym testem.
+
+## Praca Codex + Claude Code
+
+[Instrukcja i gotowe prompty](COLLABORATION.md).
+Stały kontekst: `PROJECT_CONTEXT.md`. Kolejka i stan: `HANDOFF.md`.
+Raport recenzenta: `REVIEW.md`. Instrukcje wejściowe: `AGENTS.md`, `CLAUDE.md`.
+Jeden autor edytuje; drugi ocenia konkretny commit. Notatki nie uruchamiają
+automatycznie drugiego agenta.
 
 ## Licencja
 
