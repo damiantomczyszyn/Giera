@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-import { Round, ROUND_MS, cleanScores, readJSON, rank } from './game.js';
+import { Round, ROUND_MS, cleanScores, addScore, readJSON, rank } from './game.js';
 import { Voice } from './audio.js';
 
 const $ = id => document.getElementById(id);
@@ -19,7 +19,10 @@ const stats = { rounds: safeCount(statsRaw?.rounds), hits: safeCount(statsRaw?.h
   best: Math.max(safeCount(statsRaw?.best), scores[0]?.value || 0), last: safeCount(statsRaw?.last) };
 let phase = 'idle', introDeadline = 0, operation = 0, saved = false, quickIntro = false;
 let playButtonClick = false;
+const RESULTS_PAUSE_MS = 1000;
+let resultsUnlockAt = 0, gameSpaceHeld = false;
 let hudScore = -1, hudPower = -1;
+function resultsLocked(now = performance.now()) { return phase === 'results' && now < resultsUnlockAt; }
 function notice(text) { $('notice').textContent = text; $('notice').hidden = false; }
 const voice = new Voice(() => notice('Nie udało się odtworzyć części dźwięków. Gra działa dalej — sprawdź połączenie i dźwięk w przeglądarce.'));
 function persist(key, value) {
@@ -75,15 +78,15 @@ function setPhase(value) {
   $('result').hidden = value !== 'results';
   $('interrupted').hidden = value !== 'aborted';
   $('character-wrap').style.opacity = ['results','aborted'].includes(value) ? '0' : '1';
-  $('start').disabled = ['intro','loading'].includes(value);
+  $('start').disabled = ['intro','loading'].includes(value) || resultsLocked();
   $('start-label').textContent = ({idle:'NAPRZÓD, ŻOŁNIERZU!',loading:'PRZYGOTOWANIE MISJI…',intro:'CZEKAJ NA SYGNAŁ…',
-    playing:'NACIŚNIJ I PUŚĆ!',results:'JESZCZE JEDNA RUNDA',aborted:'ZACZNIJ OD NOWA'})[value];
+    playing:'NACIŚNIJ I PUŚĆ!',results:resultsLocked() ? 'CHWILA ODDECHU…' : 'JESZCZE JEDNA RUNDA',aborted:'ZACZNIJ OD NOWA'})[value];
   $('status-label').textContent = ({idle:'GOTOWY DO AKCJI',loading:'ŁADOWANIE DŹWIĘKÓW',intro:'ODPRAWA PRZED MISJĄ',
     playing:'MISJA W TOKU',results:'MISJA ZAKOŃCZONA',aborted:'PRZERWANO SYGNAŁ'})[value];
   renderHUD();
 }
 async function startRound() {
-  if (!['idle','results','aborted'].includes(phase)) return;
+  if (!['idle','results','aborted'].includes(phase) || resultsLocked()) return;
   const current = ++operation;
   voice.stop(); cancelPress(); saved = false; game.score = 0;
   $('save-status').textContent = ''; $('score-form').hidden = false;
@@ -93,9 +96,8 @@ async function startRound() {
   // Audio failure can never keep a player on a loading or results screen.
   await Promise.race([voice.unlock(), new Promise(resolve => setTimeout(resolve, 4000))]);
   if (current !== operation || document.hidden) return;
-  quickIntro = settings.quick;
+  quickIntro = settings.quick || !voice.play('rundaPierwsza');
   introDeadline = performance.now() + (quickIntro ? 3000 : 8500);
-  if (!quickIntro) voice.play('rundaPierwsza');
   $('skip-intro').hidden = quickIntro;
   setPhase('intro'); $('arena').focus({preventScroll:true});
   announce('Przygotuj się. Runda trwa dziewięć sekund.');
@@ -118,6 +120,7 @@ function finish() {
   $('result-hits').textContent = game.hits.length;
   $('result-cps').textContent = game.cps.toFixed(2).replace('.',',');
   $('result-best').textContent = Math.max(...game.bins);
+  resultsUnlockAt = performance.now() + RESULTS_PAUSE_MS;
   setPhase('results'); renderBoard();
   voice.sequence(['gameOver', record ? 'najwyzszyWynik' : 'miernyWynik',
     ...(record ? ['wpiszLogin'] : []), 'kapitanDupa', 'sprobujJeszczeRaz']);
@@ -139,10 +142,12 @@ function release(source) {
 }
 for (const target of [$('arena'), $('start')]) {
   target.addEventListener('pointerdown', e => {
-    if (target === $('start')) playButtonClick = phase === 'playing';
+    if (target === $('start')) playButtonClick = phase === 'playing' || resultsLocked();
     if (phase !== 'playing' || e.button !== 0) return;
-    e.preventDefault(); target.setPointerCapture(e.pointerId);
+    e.preventDefault();
     press(`pointer:${e.pointerId}`);
+    try { target.setPointerCapture(e.pointerId); }
+    catch { /* A lost pointer must not discard the press. */ }
   });
   target.addEventListener('pointerup', e => {
     if (phase !== 'playing') return;
@@ -171,14 +176,25 @@ document.addEventListener('keydown', e => {
   if (isEditing(e.target)) return;
   if (e.code === 'KeyM' && !e.repeat) { settings.muted = !settings.muted; applySettings(true); }
   if (e.code !== 'Space') return;
+  if (phase === 'playing') {
+    e.preventDefault(); gameSpaceHeld = true;
+    if (!e.repeat) press('keyboard');
+    return;
+  }
+  // A Space held through the end or pressed during the pause is consumed,
+  // including its repeats and native button activation on keyup.
+  if (resultsLocked() || gameSpaceHeld) { e.preventDefault(); gameSpaceHeld = true; return; }
   // Native buttons retain their expected keyboard activation outside play.
-  if (e.target.closest?.('button,summary,a') && phase !== 'playing') return;
+  if (e.target.closest?.('button,summary,a')) return;
   e.preventDefault();
   if (e.repeat) return;
-  if (phase === 'playing') press('keyboard'); else startRound();
+  startRound();
 });
 document.addEventListener('keyup', e => {
-  if (e.code !== 'Space' || isEditing(e.target)) return;
+  if (e.code !== 'Space') return;
+  if (gameSpaceHeld) e.preventDefault();
+  gameSpaceHeld = false;
+  if (isEditing(e.target)) return;
   if (phase === 'playing') { e.preventDefault(); release('keyboard'); }
 });
 function abortRound() {
@@ -187,16 +203,22 @@ function abortRound() {
   announce('Runda przerwana. Zacznij od nowa, gdy będziesz gotowy.');
 }
 document.addEventListener('visibilitychange', () => { if (document.hidden) abortRound(); });
-window.addEventListener('blur', () => { cancelPress(); });
+window.addEventListener('blur', () => { cancelPress(); gameSpaceHeld = false; });
 window.addEventListener('pagehide', () => { abortRound(); voice.stop(); });
 $('score-form').addEventListener('submit', e => {
   e.preventDefault(); if (phase !== 'results' || saved) return;
   const name = $('name').value.trim().toLocaleUpperCase('pl').slice(0,5);
   if (!name) { $('name').setCustomValidity('Wpisz login.'); $('name').reportValidity(); return; }
   $('name').setCustomValidity('');
-  scores = cleanScores([...scores, {name, value:game.score}]);
-  const durable = persist('kd.scores.v2', scores); saved = true;
-  $('save-status').textContent = durable ? 'Wynik zapisany. Kapitan jest dumny.' : 'Wynik zapisany tylko na czas otwarcia strony.';
+  const submission = addScore(scores, {name, value:game.score});
+  saved = true;
+  if (submission.accepted) {
+    scores = submission.scores;
+    const durable = persist('kd.scores.v2', scores);
+    $('save-status').textContent = durable ? 'Wynik zapisany. Kapitan jest dumny.' : 'Wynik zapisany tylko na czas otwarcia strony.';
+  } else {
+    $('save-status').textContent = 'Wynik nie trafił do TOP 10. Spróbuj pobić dziesiąty wynik w tabeli.';
+  }
   $('score-form').hidden = true; renderBoard(); $('start').focus({preventScroll:true});
 });
 $('name').addEventListener('input', () => $('name').setCustomValidity(''));
@@ -230,6 +252,11 @@ function frame(now) {
   }
   if (phase === 'playing') {
     if (game.tick(now)) finish(); else renderHUD(now);
+  }
+  if (phase === 'results' && resultsUnlockAt && !resultsLocked(now)) {
+    resultsUnlockAt = 0;
+    $('start').disabled = false;
+    $('start-label').textContent = 'JESZCZE JEDNA RUNDA';
   }
   requestAnimationFrame(frame);
 }

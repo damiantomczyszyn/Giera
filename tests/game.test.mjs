@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Round, cleanScores, readJSON, rank } from '../web/game.js';
+import { Round, cleanScores, addScore, readJSON, rank } from '../web/game.js';
 
 test('only complete presses earn points; holding, repeats and orphan releases do not', () => {
   const r = new Round(); r.start(0);
@@ -49,4 +49,27 @@ test('ranking handles corrupt, hostile and oversized storage safely', () => {
 test('rank thresholds are consistent with the 100-point power steps', () => {
   assert.equal(rank(0)[0], 'REKRUT'); assert.equal(rank(300)[0], 'KOSMICZNY KOZAK');
   assert.equal(rank(600)[0], 'KAPITAN'); assert.equal(rank(900)[0], 'LEGENDA KURVIX');
+});
+
+test('full top ten rejects lower scores and ties without changing existing entries', () => {
+  const scores = cleanScores(Array.from({length:10}, (_,i) => ({name:`P${i}`,value:100+i*100})));
+  for (const entry of [{name:'ME',value:10}, {name:'ME',value:100}, {...scores[9]}]) {
+    const result = addScore(scores, entry);
+    assert.equal(result.accepted, false);
+    assert.deepEqual(result.scores, scores);
+  }
+  const result = addScore(scores, {name:'ME',value:110});
+  assert.equal(result.accepted, true);
+  assert.equal(result.scores.length, 10);
+  assert.deepEqual(result.scores[9], {name:'ME',value:110});
+  assert.equal(scores[9].value, 100, 'submission does not mutate the stored ranking');
+});
+
+test('accepted ranking entries preserve ties and repeated names for separate rounds', () => {
+  const scores = [{name:'SAME',value:20}, {name:'NEXT',value:20}];
+  const result = addScore(scores, {name:'SAME',value:20});
+  assert.equal(result.accepted, true);
+  assert.deepEqual(result.scores, [...scores, scores[0]]);
+  assert.equal(addScore(scores, {name:'BAD',value:-10}).accepted, false);
+  assert.equal(addScore([], {name:'NEW',value:0}).accepted, true);
 });

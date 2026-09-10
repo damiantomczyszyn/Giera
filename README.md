@@ -39,8 +39,10 @@ python kapitan_dupa.py
 - Ekran startowy — klik / `Spacja` aby rozpocząć
 - Masz **9 sekund**: naciskaj i puszczaj `Spację` lub LPM jak najszybciej
 - Każde puszczenie = **+10 punktów**; co 100 punktów zapala się jedna z 9 kropek `HIT`
-- Web: po rundzie wpisz login (max 5 znaków) i zapisz wynik lokalnie lub od razu
-  zagraj ponownie. Desktop zachowuje oryginalną sekwencję rekordu i loginu.
+- Web: po rundzie wpisz login (max 5 znaków) i zapisz wynik lokalnie. Restart
+  odblokowuje się po sekundzie, aby ostatnie naciśnięcia nie pomijały wyników.
+  Do TOP 10 trafiają najlepsze wyniki; przy remisie pierwszeństwo ma wcześniejszy
+  wpis. Desktop zachowuje oryginalną sekwencję rekordu i loginu.
 
 ## Wersja przeglądarkowa (GitHub Pages)
 

@@ -45,6 +45,15 @@ export function cleanScores(value) {
     .sort((a, b) => b.value - a.value).slice(0, 10);
 }
 
+export function addScore(scores, entry) {
+  const candidate = cleanScores([entry])[0];
+  const next = [...cleanScores(scores), ...(candidate ? [candidate] : [])]
+    .sort((a, b) => b.value - a.value).slice(0, 10);
+  // Stable sorting gives earlier entries priority in a tie. Check the actual
+  // candidate, since another round can have the same name and score.
+  return { scores: next, accepted: !!candidate && next.includes(candidate) };
+}
+
 export function readJSON(storage, key, fallback) {
   try { return JSON.parse(storage.getItem(key)) ?? fallback; } catch { return fallback; }
 }
