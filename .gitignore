@@ -14,3 +14,5 @@ Thumbs.db
 node_modules/
 .gemini-judge/
 test-results/
+.reviews/
+.review/

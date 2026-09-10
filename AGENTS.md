@@ -1,6 +1,10 @@
 # Giera — instrukcje wspólne dla agentów
 
 Przed zmianami przeczytaj `PROJECT_CONTEXT.md`, `HANDOFF.md` i `REVIEW.md`.
+Docelowe role: Codex = deweloper/integrator; Claude Code = niezależny tester.
+Szczegółowy obieg i diagramy: `docs/AGENT_WORKFLOW.md`.
+Jeśli istnieje `.review/session.json`, to jest worktree testera: oceniane SHA
+i zlecenie bierz z `.review/REVIEW_PROMPT.md`, nie z dawnej rozmowy.
 Sprawdź `git status --short` oraz `git log -5 --oneline`. Aktualne pliki i Git
 mają pierwszeństwo przed nieaktualnym opisem kodu w poprzedniej rozmowie.
 
@@ -23,6 +27,9 @@ mają pierwszeństwo przed nieaktualnym opisem kodu w poprzedniej rozmowie.
 - Recenzent nie poprawia kodu podczas audytu. Zapisuje raport w `REVIEW.md`
   z SHA, priorytetem, plikiem/linią, reprodukcją i oczekiwanym zachowaniem.
 - Autor sprawdza każde zgłoszenie. Naprawia albo uzasadnia odrzucenie dowodami.
+- Używaj `python scripts/review_worktree.py prepare --base SHA` do zamrożenia
+  kodu dla testera oraz `collect` do odbioru raportu. Nie przestawiaj istniejącego
+  worktree recenzenta; następny commit otrzymuje nowy katalog.
 - Przy równoległym edytowaniu używaj osobnych worktree i gałęzi. Jeden agent
   odpowiada za integrację. Nie wykonuj reset/clean/force-push cudzej pracy.
 - Publikuj tylko w zakresie autoryzacji użytkownika. Recenzent nie wdraża.

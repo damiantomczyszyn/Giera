@@ -1,5 +1,9 @@
 # Codex + Claude Code w jednym projekcie
 
+**Aktualna, wybrana konfiguracja: [diagramy i instrukcja worktree](docs/AGENT_WORKFLOW.md).**
+Codex = deweloper, Claude = tester. Poniżej pozostawiono ogólne zasady;
+do faktycznego przygotowania snapshotu używaj `scripts/review_worktree.py`.
+
 Oba narzędzia mogą pracować na tych samych plikach. Nie zakładaj wspólnej pamięci
 rozmowy. Synchronizacja to Git, aktualny kod i wersjonowane notatki.
 
@@ -11,7 +15,8 @@ rozmowy. Synchronizacja to Git, aktualny kod i wersjonowane notatki.
    wpisuje SHA i READY_FOR_REVIEW. Kończy edycję.
 3. Uruchamiasz recenzenta. On czyta bieżące pliki, ocenia dokładnie wskazane
    SHA, wykonuje testy i zapisuje REVIEW.md. Nie poprawia badanego kodu.
-4. Jeśli są błędy: REVIEW status CHANGES_REQUESTED, HANDOFF kolej na autora.
+4. Jeśli są błędy: REVIEW status CHANGES_REQUESTED. Po odbiorze raportu autor
+   aktualizuje HANDOFF w głównym katalogu.
    Autor reprodukuje, poprawia i przy każdym R-xxx zapisuje wynik i nowe SHA.
 5. Recenzent ponownie bada poprawki. PASS oznacza sprawdzony zakres, nie dowód
    braku wszystkich możliwych błędów. Wdrożenie wykonuje wyznaczony autor,
@@ -29,8 +34,9 @@ izolowanych katalogów, logów i jawnych uprawnień do publikacji.
 > w HANDOFF względem założeń użytkownika i oryginalnych materiałów. Nie zmieniaj
 > kodu gry. Uruchom testy i sprawdź grę w przeglądarce. Zapisz w REVIEW.md
 > werdykt PASS lub CHANGES_REQUESTED, konkretne błędy z priorytetem,
-> plikiem/linią, reprodukcją oraz rzeczy niesprawdzone. Zaktualizuj HANDOFF:
-> kolej na autora, jeśli są poprawki. Nie wdrażaj ani nie uruchamiaj drugiego agenta.
+> plikiem/linią, reprodukcją oraz rzeczy niesprawdzone. W worktree testera edytuj
+> tylko REVIEW.md; autor odbierze raport i zaktualizuje swój HANDOFF.
+> Nie wdrażaj ani nie uruchamiaj drugiego agenta.
 
 ## Gotowy prompt dla autora po recenzji
 
