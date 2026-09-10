@@ -82,17 +82,6 @@ animację, dźwięki, zapis po odświeżeniu, dotyk i działanie bez audio/stora
 Zrzuty trafiają do ignorowanego `test-results/`.
 Zmiennej `GAME_URL` można użyć do sprawdzenia wdrożonej strony tym samym testem.
 
-## Praca Codex + Claude Code
-
-[Instrukcja i gotowe prompty](COLLABORATION.md).
-[Diagramy, konfiguracja worktree i komendy krok po kroku](docs/AGENT_WORKFLOW.md).
-`python scripts/review_worktree.py prepare --base SHA` przygotowuje snapshot,
-a `python scripts/review_worktree.py collect` odbiera raport powiązany z commitem.
-Stały kontekst: `PROJECT_CONTEXT.md`. Kolejka i stan: `HANDOFF.md`.
-Raport recenzenta: `REVIEW.md`. Instrukcje wejściowe: `AGENTS.md`, `CLAUDE.md`.
-Jeden autor edytuje; drugi ocenia konkretny commit. Notatki nie uruchamiają
-automatycznie drugiego agenta.
-
 ## Licencja
 
 GPL-3.0 (zgodnie z licencją materiałów źródłowych).

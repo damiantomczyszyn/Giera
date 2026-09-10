@@ -33,10 +33,7 @@ jobs:
         run: npm test
 
       - name: Check Python
-        run: python -m py_compile kapitan_dupa.py main.py scripts/build_web.py scripts/review_worktree.py
-
-      - name: Test review worktree isolation
-        run: python -m unittest discover -s tests -p 'test_review_worktree.py' -v
+        run: python -m py_compile kapitan_dupa.py main.py scripts/build_web.py
 
       - name: Build static game
         run: python scripts/build_web.py
